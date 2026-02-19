@@ -1,0 +1,5 @@
+{
+  "name": "ELACHI SPICE Invoice Generator",
+  "description": "An automated billing system that generates unique invoice numbers and automatically sets the current date. Add items, calculate totals, and print professional-looking invoices with ease.",
+  "requestFramePermissions": []
+}

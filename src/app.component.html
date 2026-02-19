@@ -1,0 +1,339 @@
+<style>
+  @media screen {
+    .print-only {
+      display: none;
+    }
+  }
+  @media print {
+    body * {
+      visibility: hidden;
+    }
+    .print-only, .print-only * {
+      visibility: visible;
+    }
+    .print-only {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+    }
+    .screen-only {
+      display: none;
+    }
+  }
+</style>
+
+<div class="min-h-screen bg-gray-100 p-4 sm:p-6 lg:p-8 screen-only">
+  <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-2xl p-8">
+    
+    <!-- Invoice Header -->
+    <header class="flex justify-between items-start mb-10">
+      <div>
+        <div class="flex items-center space-x-3">
+          <svg class="w-12 h-12 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+          </svg>
+          <h1 class="text-3xl font-bold text-gray-800">ELACHI SPICE</h1>
+        </div>
+        <p class="text-gray-500 mt-2">PATTAMBI, MUTHUTHALA, KARAKUTH</p>
+        <p class="text-gray-500">Phone: 7034295727</p>
+      </div>
+      <div class="text-right">
+        <h2 class="text-4xl font-bold text-gray-700 uppercase tracking-wider">Invoice</h2>
+        <p class="text-gray-500 mt-2">#{{ invoiceNumber() }}</p>
+        <p class="text-gray-500"><span class="font-semibold">Date:</span> {{ invoiceDate() }}</p>
+      </div>
+    </header>
+
+    <!-- Customer Info -->
+    <section class="mb-10">
+      <h3 class="text-xl font-semibold text-gray-700 border-b-2 border-gray-200 pb-2 mb-4">Bill To:</h3>
+      <input 
+        type="text" 
+        id="customerName"
+        name="customerName"
+        [(ngModel)]="customerName"
+        placeholder="Enter Customer Name"
+        class="w-full max-w-sm p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition" />
+    </section>
+
+    <!-- Items Table -->
+    <section>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-gray-100 border-b-2 border-gray-200">
+              <th class="p-4 font-semibold text-gray-600 uppercase">Description</th>
+              <th class="p-4 font-semibold text-gray-600 uppercase text-center w-24">Qty</th>
+              <th class="p-4 font-semibold text-gray-600 uppercase text-center w-24">Unit</th>
+              <th class="p-4 font-semibold text-gray-600 uppercase text-right w-32">Unit Price</th>
+              <th class="p-4 font-semibold text-gray-600 uppercase text-right w-32">Total</th>
+              <th class="p-4 font-semibold text-gray-600 uppercase text-center w-16"></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (item of items(); track item.description + $index; let i = $index) {
+              <tr class="border-b border-gray-100 hover:bg-gray-50">
+                <td class="p-4 text-gray-800">{{ item.description }}</td>
+                <td class="p-4 text-gray-800 text-center">{{ item.quantity }}</td>
+                <td class="p-4 text-gray-800 text-center">{{ item.unit }}</td>
+                <td class="p-4 text-gray-800 text-right">{{ item.price.toFixed(2) }}</td>
+                <td class="p-4 text-gray-800 font-medium text-right">₹{{ getItemTotal(item).toFixed(2) }}</td>
+                <td class="p-4 text-center">
+                  <button (click)="removeItem(i)" class="text-red-500 hover:text-red-700 transition">
+                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            }
+            <!-- Add New Item Row -->
+            <tr class="bg-gray-50">
+                <td class="p-2">
+                    <input type="text" [(ngModel)]="newItemDescription" placeholder="Item description" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm">
+                </td>
+                <td class="p-2">
+                    <input type="number" [(ngModel)]="newItemQuantity" placeholder="0" min="0" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm text-center">
+                </td>
+                <td class="p-2">
+                    <input type="text" [(ngModel)]="newItemUnit" placeholder="e.g. hrs, pcs" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm text-center">
+                </td>
+                <td class="p-2">
+                    <input type="number" [(ngModel)]="newItemPrice" placeholder="0.00" min="0" step="0.01" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-sm text-right">
+                </td>
+                <td class="p-2 text-right"></td>
+                <td class="p-2 text-center">
+                  <button (click)="addItem()" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition font-semibold text-sm">
+                    Add
+                  </button>
+                </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Financial Controls & Totals -->
+    <div class="flex flex-col md:flex-row justify-between mt-10">
+      <div class="w-full md:w-1/2">
+        <!-- Can add notes here later -->
+      </div>
+      <div class="w-full md:max-w-xs space-y-4">
+        <!-- Tax and Discount Inputs -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+              <label for="taxRate" class="font-semibold text-gray-700">Tax Rate (%)</label>
+              <input 
+                  type="number" 
+                  id="taxRate"
+                  [ngModel]="taxRate() * 100"
+                  (ngModelChange)="taxRate.set($event / 100)"
+                  min="0"
+                  class="w-24 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-right"
+              />
+          </div>
+          <div class="flex items-center justify-between">
+              <label for="discountValue" class="font-semibold text-gray-700">Discount</label>
+              <div class="flex items-center">
+                  <input 
+                      type="number" 
+                      id="discountValue"
+                      [(ngModel)]="discountValue"
+                      min="0"
+                      class="w-24 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition text-right"
+                  />
+                  <div class="flex">
+                      <button (click)="discountType.set('percentage')"
+                              [class.bg-blue-600]="discountType() === 'percentage'"
+                              [class.text-white]="discountType() === 'percentage'"
+                              [class.bg-white]="discountType() !== 'percentage'"
+                              class="px-3 py-2 border-t border-b border-gray-300 text-sm font-medium focus:outline-none transition-colors">
+                        %
+                      </button>
+                      <button (click)="discountType.set('fixed')"
+                              [class.bg-blue-600]="discountType() === 'fixed'"
+                              [class.text-white]="discountType() === 'fixed'"
+                              [class.bg-white]="discountType() !== 'fixed'"
+                              class="px-3 py-2 border border-gray-300 rounded-r-md text-sm font-medium focus:outline-none transition-colors">
+                        ₹
+                      </button>
+                  </div>
+              </div>
+          </div>
+        </div>
+
+        <!-- Totals Display -->
+        <div class="text-gray-700 space-y-3 pt-4 border-t-2 border-gray-200">
+          <div class="flex justify-between">
+            <span class="font-semibold">Subtotal</span>
+            <span>₹{{ subtotal().toFixed(2) }}</span>
+          </div>
+          @if (discountAmount() > 0) {
+            <div class="flex justify-between text-red-500">
+              <span class="font-semibold">Discount</span>
+              <span>- ₹{{ discountAmount().toFixed(2) }}</span>
+            </div>
+          }
+          <div class="flex justify-between">
+            <span class="font-semibold">Tax ({{ (taxRate() * 100).toFixed(1) }}%)</span>
+            <span>₹{{ taxAmount().toFixed(2) }}</span>
+          </div>
+          <div class="flex justify-between text-2xl font-bold text-gray-900 border-t-2 border-gray-300 pt-3 mt-3">
+            <span>Total</span>
+            <span>₹{{ total().toFixed(2) }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer & Actions -->
+    <footer class="mt-16 text-center text-gray-500">
+      <p>Thank you for your business!</p>
+      <div class="mt-6 flex justify-center flex-wrap gap-4">
+        <button (click)="generateNewInvoice()" class="flex items-center space-x-2 bg-green-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition">
+          <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 0 0-3.7-3.7 48.678 48.678 0 0 0-7.324 0 4.006 4.006 0 0 0-3.7 3.7c-.092 1.21-.138 2.43-.138 3.662v.513a5.035 5.035 0 0 0 2.418 4.234l.32.222a6.975 6.975 0 0 0 4.49 1.626h.008a6.975 6.975 0 0 0 4.49-1.626l.32-.222a5.035 5.035 0 0 0 2.418-4.234v-.513Z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v6.75m-3.75-3.75h7.5" />
+          </svg>
+          <span>New Invoice</span>
+        </button>
+        <button (click)="openPrintPreview()" class="flex items-center space-x-2 bg-gray-700 text-white px-6 py-3 rounded-lg shadow-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-700 focus:ring-opacity-50 transition">
+          <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.32 0z" />
+          </svg>
+          <span>Preview & Print</span>
+        </button>
+         <button (click)="saveAsImage()" class="flex items-center space-x-2 bg-purple-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+            </svg>
+            <span>Save as Image</span>
+        </button>
+        <button (click)="saveAsPdf()" class="flex items-center space-x-2 bg-red-500 text-white px-6 py-3 rounded-lg shadow-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 transition">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+            </svg>
+            <span>Save as PDF</span>
+        </button>
+      </div>
+    </footer>
+
+  </div>
+</div>
+
+<!-- Print-only receipt layout -->
+<div class="print-only" id="receipt-for-export">
+    <div class="bg-white p-4 shadow-inner border" style="font-family: 'Courier New', Courier, monospace; font-size: 10pt; color: #000;">
+      <!-- Duplicated receipt content for on-screen preview -->
+      <div class="header-container text-center mb-4">
+          <h2 class="text-lg font-bold">ELACHI SPICE</h2>
+          <p class="text-xs">PATTAMBI, MUTHUTHALA, KARAKUTH</p>
+          <p class="text-xs">Phone: 7034295727</p>
+          <br>
+          <p class="text-xs">Invoice #: {{ invoiceNumber() }}</p>
+          <p class="text-xs">Date: {{ invoiceDate() }}</p>
+      </div>
+
+      <div class="customer-container border-t border-b border-dashed border-black py-2 my-4">
+          <p class="text-xs"><strong>Bill To:</strong> {{ customerName() }}</p>
+      </div>
+      
+      <div class="items-container">
+          @for (item of items(); track item.description + $index) {
+              <div class="border-b border-dashed border-black pb-1 mb-1 text-xs">
+                  <div>{{ item.description }}</div>
+                  <div class="flex justify-between">
+                      <span>&nbsp;&nbsp;{{ item.quantity }} {{ item.unit }} x ₹{{ item.price.toFixed(2) }}</span>
+                      <span>₹{{ getItemTotal(item).toFixed(2) }}</span>
+                  </div>
+              </div>
+          }
+      </div>
+
+      <div class="totals-container border-t border-black pt-2 mt-2 text-xs">
+          <div class="flex justify-between"><span>Subtotal:</span> <span>₹{{ subtotal().toFixed(2) }}</span></div>
+          @if (discountAmount() > 0) {
+              <div class="flex justify-between"><span>Discount:</span> <span>- ₹{{ discountAmount().toFixed(2) }}</span></div>
+          }
+          <div class="flex justify-between"><span>Tax:</span> <span>₹{{ taxAmount().toFixed(2) }}</span></div>
+          <div class="flex justify-between border-t border-black mt-1 pt-1">
+            <h3 class="font-bold">Total:</h3> <h3 class="font-bold">₹{{ total().toFixed(2) }}</h3>
+          </div>
+      </div>
+
+      <div class="footer-container text-center mt-5">
+          <p class="text-xs">Thank you for your business!</p>
+      </div>
+    </div>
+</div>
+
+<!-- Print Preview Modal -->
+@if (showPrintPreview()) {
+  <div class="screen-only fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50 p-4" (click)="closePrintPreview()">
+    <div class="bg-white rounded-lg shadow-2xl w-full max-w-sm" (click)="$event.stopPropagation()">
+      <div class="flex justify-between items-center p-4 border-b">
+        <h3 class="text-lg font-semibold text-gray-800">Receipt Preview</h3>
+        <button (click)="closePrintPreview()" class="text-gray-400 hover:text-gray-700 text-2xl leading-none">&times;</button>
+      </div>
+      
+      <!-- Preview content area -->
+      <div class="p-6 bg-gray-50">
+        <div class="bg-white p-4 shadow-inner border" style="font-family: 'Courier New', Courier, monospace; font-size: 10pt; color: #000;">
+          <!-- Duplicated receipt content for on-screen preview -->
+          <div class="header-container text-center mb-4">
+              <h2 class="text-lg font-bold">ELACHI SPICE</h2>
+              <p class="text-xs">PATTAMBI, MUTHUTHALA, KARAKUTH</p>
+              <p class="text-xs">Phone: 7034295727</p>
+              <br>
+              <p class="text-xs">Invoice #: {{ invoiceNumber() }}</p>
+              <p class="text-xs">Date: {{ invoiceDate() }}</p>
+          </div>
+
+          <div class="customer-container border-t border-b border-dashed border-black py-2 my-4">
+              <p class="text-xs"><strong>Bill To:</strong> {{ customerName() }}</p>
+          </div>
+          
+          <div class="items-container">
+              @for (item of items(); track item.description + $index) {
+                  <div class="border-b border-dashed border-black pb-1 mb-1 text-xs">
+                      <div>{{ item.description }}</div>
+                      <div class="flex justify-between">
+                          <span>&nbsp;&nbsp;{{ item.quantity }} {{ item.unit }} x ₹{{ item.price.toFixed(2) }}</span>
+                          <span>₹{{ getItemTotal(item).toFixed(2) }}</span>
+                      </div>
+                  </div>
+              }
+          </div>
+
+          <div class="totals-container border-t border-black pt-2 mt-2 text-xs">
+              <div class="flex justify-between"><span>Subtotal:</span> <span>₹{{ subtotal().toFixed(2) }}</span></div>
+              @if (discountAmount() > 0) {
+                  <div class="flex justify-between"><span>Discount:</span> <span>- ₹{{ discountAmount().toFixed(2) }}</span></div>
+              }
+              <div class="flex justify-between"><span>Tax:</span> <span>₹{{ taxAmount().toFixed(2) }}</span></div>
+              <div class="flex justify-between border-t border-black mt-1 pt-1">
+                <h3 class="font-bold">Total:</h3> <h3 class="font-bold">₹{{ total().toFixed(2) }}</h3>
+              </div>
+          </div>
+
+          <div class="footer-container text-center mt-5">
+              <p class="text-xs">Thank you for your business!</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="flex justify-end items-center p-4 bg-gray-50 border-t rounded-b-lg">
+        <button (click)="closePrintPreview()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400 transition mr-2">
+          Cancel
+        </button>
+        <button (click)="executePrint()" class="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition">
+          <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.32 0z" />
+          </svg>
+          <span>Confirm & Print</span>
+        </button>
+      </div>
+    </div>
+  </div>
+}
